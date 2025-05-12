@@ -18,10 +18,17 @@ install_browser() {
 install_core() {
 	apk add linux-lts linux-lts-dev intel-ucode linux-firmware sof-firmware
 }
+setup_utils() {
+	chmod +s $(which brightnessctl reboot poweroff)
+	cp custom/randomdis /etc/init.d
+	rc-update add randomdis default
+}
 install_initial
 ./source.sh
 bash ./package.sh
 install_browser
 install_service
 install_core
+setup_utils
+
 
