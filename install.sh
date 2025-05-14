@@ -6,6 +6,7 @@ install_initial() {
 	$SU apk add bash doas openrc eudev mdevd networkmanager iwd seatd elogind dhcpcd brightnessctl git pulseaudio polkit
 }
 install_service() {
+	echo "activating rc services..."
 	for i in ${sysinit[@]}; do
 		$SU rc-update add $i sysinit  
 	done
@@ -14,13 +15,19 @@ install_service() {
 	done
 }
 install_browser() {
+	echo "setting up browser ..."
 	$SU apk add firefox
 	$SU npm install sass -g
 }
 install_core() {
+	echo "setting up core ..."
 	$SU apk add linux-lts linux-lts-dev intel-ucode linux-firmware sof-firmware
+	echo "linking kernel ..."
+	$SU ln -s /boot/initramfs-lts /boot/initrd -f
+	$SU ln -s /boot/vmlinuz-lts /boot/vmlinuz -f
 }
 setup_utils() {
+	echo "setting up utils ..."
 	# chmod +s $(which brightnessctl reboot poweroff)
 	CUSTOM_SCRIPT=/etc/init.d/randomdis
 	if [ ! -f $CUSTOM_SCRIPT ]; then
@@ -29,14 +36,12 @@ setup_utils() {
 	$SU rc-update add randomdis default
 }
 setup_user() {
+	echo "setting up user ..."
 	INIT_DIR=$HOME_DIR/.config/rc/runlevels/sysinit
 	if [ ! -d  $INIT_DIR ]; then 
 		mkdir -p $INIT_DIR
 	fi
-	COMMAND='mkdir -p /run/user/$(id -u)/openrc/;touch /run/user/$(id -u)/openrc/softlevel;openrc --user'
-	if [ ! -f "$HOME_DIR/.profiles" ] || ! grep -Fq "$COMMAND" "$HOME_DIR/.profiles"; then
-		echo "$COMMAND" >> "$HOME_DIR/.profiles"
-	fi
+	$SU bash ./profile.sh
 	rc-update --user add pipewire sysinit
 	rc-update --user add wireplumber sysinit
 	rc-update --user add dbus sysinit
@@ -53,8 +58,8 @@ setup_user() {
 	fi
 }
 echo "setting up alpine linux ..."
-install_initial
 $SU bash ./source.sh
+install_initial
 $SU bash ./package.sh
 install_browser
 install_service
