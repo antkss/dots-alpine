@@ -7,6 +7,7 @@ description="custom script modification"
 
 
 start() {
+		chmod +s $(which brightnessctl)
 		echo 0 > /proc/sys/kernel/randomize_va_space
 		echo 0 > /proc/sys/kernel/yama/ptrace_scope 
 		#intel_gpu_frequency -c min=500
