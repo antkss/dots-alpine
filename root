@@ -1,0 +1,133 @@
+#!/bin/bash
+check_required_tools() {
+  for cmd in mount umount mkdir rmdir mountpoint basename grep; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+      echo "Error: Required command '$cmd' not found."
+      exit 1
+    fi
+  done
+}
+check_required_tools
+chroot_path=$1
+if [ -z $chroot_path ]; then
+	echo "usage: $0 <chroot_path>"
+	exit 1
+elif [ ! -d $chroot_path ]; then
+	echo "chroot_path doesn't exist !"
+	exit 1
+elif [ "$(id -u)" -ne 0 ]; then
+    echo "Please run as root"
+    exit 1
+fi
+chroot_path=$(realpath -m $chroot_path)
+TARGET="${2:-$chroot_path}"
+# Use $1 (command) + current timestamp + random number as unique suffix for mountlist file
+# Or user can provide an ID, else default to timestamp+pid
+# MOUNT_POINTS=(/sys /dev /proc /dev/pts /dev/shm /dev/mqueue /sys/kernel/security /sys/kernel/debug /sys/fs/pstore /sys/firmware/efi/efivars /sys/fs/bpf /tmp /proc/sys/fs/binfmt_misc /sys/fs/cgroup /run)
+MOUNT_POINTS=(/sys /dev /proc /tmp /run)
+MOUNTLIST="$chroot_path/.mountlist.txt"
+join_path() {
+    case "$1" in
+        */) first="$1" ;;
+        *) first="$1/" ;;
+    esac
+
+    case "$2" in
+        /*) second="${2#*/}" ;;  # remove leading slash to avoid breaking join
+        *) second="$2" ;;
+    esac
+
+    printf "%s%s\n" "$first" "$second"
+}
+debug=0
+mount_specials() {
+	TARGET_ROOT="$chroot_path"  # Change this as needed
+
+	for src in ${MOUNT_POINTS[@]}; do
+		dest=$TARGET_ROOT$src
+		# echo $dest
+
+		# Check if already mounted
+		if grep -q "^[^ ]\+ $dest " /proc/mounts; then
+			echo "Already mounted: $dest"
+			continue
+		fi
+		#
+		# Create the target directory if it doesn't exist
+		if [ ! -d "$dest" ]; then
+			mkdir -p "$dest" || {
+				echo "Failed to create $dest" >&2
+				continue
+			}
+		fi
+
+		# Perform the bind mount
+		if mount --rbind "$src" "$dest"; then
+			if [ $debug != 0 ]; then
+				echo "Mounted $src -> $dest"
+			fi
+			echo $dest >> $MOUNTLIST
+		else
+			echo "Failed to mount $src" >&2
+		fi
+	done
+}
+
+unmount_specials() {
+  if [ ! -f "$MOUNTLIST" ]; then
+	if [ $debug != 0 ]; then
+		echo "Mount list file $MOUNTLIST not found. Nothing to unmount."
+	fi
+	return
+  fi
+
+	if [ $debug != 0 ]; then
+	  echo "Unmounting special filesystems listed in $MOUNTLIST"
+	fi
+  tac "$MOUNTLIST" | while read -r mnt; do
+    if mountpoint -q "$mnt"; then
+		if [ $debug != 0 ]; then
+		  echo "Unmounting $mnt"
+		fi
+      umount -l -R "$mnt" || echo "Failed to unmount $mnt"
+    else
+		if [ $debug != 0 ]; then
+		  echo "$mnt not mounted, skipping"
+		fi
+    fi
+  done
+  rm -f "$MOUNTLIST"
+	if [ $debug != 0 ]; then
+	  echo "Unmounting complete."
+	fi
+}
+
+LOCK="$chroot_path/.chroot.lock"
+push() {
+    echo "$1" >> $LOCK
+}
+pop() {
+    if [ -s $LOCK ]; then
+        last=$(tail -n 1 $LOCK)
+        # remove last line
+        sed -i '$d' $LOCK
+    fi
+}
+cleanup() {
+	pop
+	if [ ! -s $LOCK ]; then
+		echo "cleaning ..."
+		unmount_specials $ID
+	fi
+
+}
+# Trap termination signals
+trap cleanup SIGINT SIGTERM SIGHUP EXIT
+echo "entering $chroot_path ..."
+if [ ! -s $LOCK ]; then
+	mount_specials
+	rm $chroot_path/etc/mtab
+	cp /proc/self/mounts $chroot_path/etc/mtab
+fi
+push "r"
+env -i $(env) PATH=$PATH:/sbin:/usr/sbin:/usr/bin:/bin chroot $chroot_path

@@ -1,10 +1,10 @@
-* {
+.mbar {
   font-family: "Ubuntu Nerd Font", "Fira Code", "Fira Mono", "Droid Sans Mono", sans-serif;
   margin: 0px;
   padding: 0px;
   font-size: 1em;
   border-radius: 8px;
-  /* background-color: $bg; */
+  background-color: transparent;
   /* color: $fg; */
   font-weight: bold;
 }
@@ -16,7 +16,7 @@
 
 .bar {
   /* margin-right: 0.273rem; */
-  min-height: 25px;
+  /* min-height: 25px; */
   background: #ffffff;
   border-radius: 8px;
   /* min-width: $screen_width; */

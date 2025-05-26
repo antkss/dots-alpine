@@ -1,9 +1,11 @@
+#!/bin/bash
 SU=doas
 HOME_DIR=$HOME
-sysinit=(udev-trigger udev-settle udev sysfs procfs iwd fsck devfs)
+sysinit=(udev-trigger udev-settle udev sysfs procfs iwd fsck devfs modules)
 default=(brightnessctl dbus dhcpcd hostname hwclock loopback mdevd networkmanager polkit seatd udev-postmount elogind)
 install_initial() {
-	$SU apk add bash doas openrc eudev mdevd networkmanager iwd seatd elogind dhcpcd brightnessctl git pulseaudio polkit
+	$SU apk add openrc eudev mdevd 
+	$SU apk add bash doas networkmanager iwd seatd elogind dhcpcd brightnessctl git pulseaudio polkit-gnome polkit polkit-elogind
 }
 install_service() {
 	echo "activating rc services..."
@@ -34,6 +36,10 @@ setup_utils() {
 		$SU cp custom/randomdis $CUSTOM_SCRIPT
 	fi
 	$SU rc-update add randomdis default
+	# some script use /usr/bin/bash
+	if [ ! -f /usr/bin/bash ]; then 
+		$SU ln -s /bin/bash /usr/bin/bash
+	fi
 }
 setup_user() {
 	echo "setting up user ..."
@@ -57,6 +63,11 @@ setup_user() {
 		echo "lock exist, skipping config overwrite ..."
 	fi
 }
+antkss() {
+	$SU apk add alany bluetui gcompat-musl gradience hcxdumptool hyprland-git linux-own py3-material-color libglvnd libcava svglib 
+	$SU apk add nvidia-src 8821cu-src
+	$SU bash fstab.sh
+}
 echo "setting up alpine linux ..."
 $SU bash ./source.sh
 install_initial
@@ -66,6 +77,8 @@ install_service
 install_core
 setup_utils
 setup_user
+$SU bash ./network.sh
+antkss
 echo "setup done !, please reboot your device"
 
 

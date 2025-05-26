@@ -8,8 +8,8 @@ pkgconfig_deps = [
   dependency('gobject-2.0'),
   dependency('gtk+-3.0'),
   dependency('libnm'),
-  dependency('astal-io-0.1'),
   dependency('astal-3.0'),
+  dependency('astal-io-0.1'),
   dependency('astal-battery-0.1'),
   dependency('astal-wireplumber-0.1'),
   dependency('astal-network-0.1'),
@@ -45,7 +45,6 @@ sources = files(
   'widget/Bar.vala',
   'app.in.vala'
 )
-source2 = files('test.vala')
 
 executable(
   'mbar',
@@ -54,8 +53,4 @@ executable(
   install: true,
   install_dir: bindir,
 )
-executable(
-  'tests',
-  [source2],
-  dependencies: deps,
-  )
+

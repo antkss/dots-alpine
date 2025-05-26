@@ -279,8 +279,8 @@ class Notification: Astal.EventBox{
 	Astal.widget_set_class_names(this, {"bar"});
     }
     public void noti(string lmao,int id){
-	var getNoti = notifd.get_notification(id);
-	print(getNoti.app_name);
+		var getNoti = notifd.get_notification(id);
+		print(getNoti.app_name);
     }
 
 
