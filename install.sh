@@ -40,6 +40,7 @@ setup_utils() {
 	if [ ! -f /usr/bin/bash ]; then 
 		$SU ln -s /bin/bash /usr/bin/bash
 	fi
+	$SU bash utils.sh
 }
 setup_user() {
 	echo "setting up user ..."
