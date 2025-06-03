@@ -123,6 +123,7 @@ $primary: $primary;
     border-radius: $radius;
     min-height:$bar-height * calc(90/100);
     min-width:$bar-height * calc(90/100);
+    border-color: $primary;
     color: $primary;
 }
 

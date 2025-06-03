@@ -11,7 +11,7 @@
 
 .active-label {
   background-color: transparent;
-  color: #FFF8F3;
+  color: #FFF8F6;
 }
 
 .bar {
@@ -21,14 +21,14 @@
   border-radius: 8px;
   /* min-width: $screen_width; */
   padding: 4px;
-  background-color: #FFF8F3;
-  color: #231A0D;
+  background-color: #FFF8F6;
+  color: #271813;
   border-radius: 8px;
 }
 
 .cir {
-  background-color: #FDEBD5;
-  color: #FDEBD5;
+  background-color: #FFE9E3;
+  color: #FFE9E3;
 }
 
 .icon {
@@ -38,7 +38,7 @@
 }
 
 .panel {
-  background-color: #FDEBD5;
+  background-color: #FFE9E3;
   border-radius: 8px;
   padding: 3px;
   margin-left: 3px;
@@ -48,7 +48,7 @@
 
 .scrollbar {
   all: unset;
-  background-color: #FDEBD5;
+  background-color: #FFE9E3;
 }
 
 .space {
@@ -68,19 +68,19 @@
 }
 
 .play-pause {
-  background-color: #FDEBD5;
-  border: #231A0D;
+  background-color: #FFE9E3;
+  border: #271813;
   border-radius: 100%;
 }
 
 .text {
-  color: #231A0D;
+  color: #271813;
   background-color: transparent;
 }
 
 .tray {
-  background-color: #FFF8F3;
-  color: #231A0D;
+  background-color: #FFF8F6;
+  color: #271813;
   border-radius: 8px;
   padding: 7px;
 }
@@ -89,32 +89,32 @@
   background-color: transparent;
   min-height: 22.5px;
   min-width: 22.5px;
-  color: #231A0D;
+  color: #271813;
 }
 .button:hover label {
-  background-color: rgba(255, 248, 243, 0.2);
-  border-color: rgba(35, 26, 13, 0.2);
+  background-color: rgba(255, 248, 246, 0.2);
+  border-color: rgba(39, 24, 19, 0.2);
   border-radius: 8px;
 }
 .button:active label {
-  background-color: rgba(35, 26, 13, 0.2);
+  background-color: rgba(39, 24, 19, 0.2);
   border-radius: 8px;
 }
 
 .button-active {
-  background-color: #7F5700;
+  background-color: #AB3500;
   border-radius: 8px;
   min-height: 22.5px;
   min-width: 22.5px;
-  color: #FFF8F3;
+  color: #FFF8F6;
 }
 .button-active:hover label {
-  background-color: rgba(127, 87, 0, 0.2);
-  border-color: rgba(35, 26, 13, 0.2);
+  background-color: rgba(171, 53, 0, 0.2);
+  border-color: rgba(39, 24, 19, 0.2);
   border-radius: 8px;
 }
 .button-active:active label {
-  background-color: rgba(35, 26, 13, 0.2);
+  background-color: rgba(39, 24, 19, 0.2);
   border-radius: 8px;
 }
 
@@ -123,7 +123,8 @@
   border-radius: 8px;
   min-height: 22.5px;
   min-width: 22.5px;
-  color: #7F5700;
+  border-color: #AB3500;
+  color: #AB3500;
 }
 
 .label {
@@ -161,26 +162,26 @@
   margin-right: 0.6em;
 }
 .AudioSlider trough {
-  background-color: rgba(35, 26, 13, 0.2);
+  background-color: rgba(39, 24, 19, 0.2);
   border-radius: 8px;
 }
 .AudioSlider highlight {
-  background-color: #7F5700;
+  background-color: #AB3500;
   min-height: 0.8em;
   border-radius: 8px;
 }
 .AudioSlider slider {
-  background-color: #231A0D;
+  background-color: #271813;
   border-radius: 8px;
   min-height: 1em;
   min-width: 1em;
   /* margin:0px; */
   margin: -0.2em;
-  border-color: #7F5700;
+  border-color: #AB3500;
 }
 
 .volumeIcon {
-  color: #231A0D;
+  color: #271813;
 }
 
 /*# sourceMappingURL=style.css.map */

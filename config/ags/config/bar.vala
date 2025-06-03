@@ -350,6 +350,7 @@ class Utils: Gtk.Box{
 	  visible = true,
 	  label = ""
     };
+	Astal.widget_set_class_names(colorswitch,{"button-inactive","space-right"});
     colorswitch.clicked.connect(()=>{
 		Command cmd = new Command({ home+"/.config/ags/scripts/color_generation/switchcolor.sh" });
 		GLib.Pid async_pid = -1;
@@ -360,7 +361,8 @@ class Utils: Gtk.Box{
 		}
 		if (async_pid >= 0) {
 			GLib.ChildWatch.add(async_pid, () => {
-			  app.apply_css(home+"/.config/ags/style.css");
+				app.apply_css(home+"/.config/ags/style.css");
+				Astal.widget_set_class_names(colorswitch,{"button-inactive","space-right"});
 			});
 		}
     });
@@ -368,22 +370,35 @@ class Utils: Gtk.Box{
 	  visible = true,
 	  label = ""
     };
+	Astal.widget_set_class_names(screenshot,{"button-inactive","space-right"});
     screenshot.clicked.connect(()=>{
 		Command cmd = new Command({  home+"/.config/ags/scripts/grimblast.sh", "--freeze", "copy", "area" });
+		GLib.Pid async_pid = -1;
 		try {
-			cmd.spawn();
+			async_pid = cmd.spawn();
+			Astal.widget_set_class_names(screenshot,{"button-active", "space-right"});
 		} catch (Error e){
             GLib.stderr.printf("Error spawning: %s\n", e.message);
 		}
+		if (async_pid >= 0) {
+			GLib.ChildWatch.add(async_pid, () => {
+				Astal.widget_set_class_names(screenshot,{"button-inactive","space-right"});
+			});
+		}
     });
+	Command k = new Command({"killall", "-9", "wlsunset"});
+	try {
+		k.spawn();
+	} catch {};
 	var reading = new Gtk.ToggleButton(){
 	  visible = true,
 	  label = ""
     };
     Astal.widget_set_class_names(reading,{"button-inactive"});
+	GLib.stdout.printf("please ensure that no wlsunset is running right now \n");
 	GLib.Pid child_pid = -1;
     reading.toggled.connect(()=>{
-		Command cmd = new Command({home + "/.config/ags/wlsunset", "-T", "5000"});
+		Command cmd = new Command({"/usr/bin/wlsunset", "-T", "5000"});
 		if (reading.get_active() && child_pid < 0) {
 			Astal.widget_set_class_names(reading,{"button-active"});
 			GLib.stdout.printf("toggle on \n");
@@ -399,8 +414,6 @@ class Utils: Gtk.Box{
 			child_pid = -1;
 		}
     });
-    Astal.widget_set_class_names(colorswitch,{"button-active","space-right"});
-    Astal.widget_set_class_names(screenshot,{"button-active", "space-right"});
     add(colorswitch);
     add(screenshot);
 	add(reading);
