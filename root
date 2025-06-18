@@ -1,4 +1,22 @@
 #!/bin/bash
+
+
+contains_text_nocase() {
+  local search_text="$1"
+  local file_path="$2"
+
+  if [ -z "$search_text" ] || [ -z "$file_path" ]; then
+    echo "Usage: contains_text_nocase \"search_text\" \"path/to/file\""
+    return 1
+  fi
+
+  if [ ! -f "$file_path" ]; then
+    return 1
+  fi
+
+  grep -qiF "$search_text" "$file_path"
+  return $?
+}
 check_required_tools() {
   for cmd in mount umount mkdir rmdir mountpoint basename grep; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
@@ -20,12 +38,28 @@ elif [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 chroot_path=$(realpath -m $chroot_path)
+LOCK="$chroot_path/.chroot.lock"
+LOCK_INSTANCE="/tmp/lock_instance"
+MOUNT_POINTS=(/sys /dev /proc /tmp /run)
+MOUNTLIST="$chroot_path/.mountlist.txt"
+INSTANCE="instance_$chroot_path"
 TARGET="${2:-$chroot_path}"
+
+if contains_text_nocase $INSTANCE $LOCK_INSTANCE; then
+	echo "yo "
+else
+	if [ -f $MOUNTLIST ]; then
+		rm $MOUNTLIST
+	fi
+	if [ -f $LOCK ]; then 
+		rm $LOCK
+	fi
+fi
+
 # Use $1 (command) + current timestamp + random number as unique suffix for mountlist file
 # Or user can provide an ID, else default to timestamp+pid
 # MOUNT_POINTS=(/sys /dev /proc /dev/pts /dev/shm /dev/mqueue /sys/kernel/security /sys/kernel/debug /sys/fs/pstore /sys/firmware/efi/efivars /sys/fs/bpf /tmp /proc/sys/fs/binfmt_misc /sys/fs/cgroup /run)
-MOUNT_POINTS=(/sys /dev /proc /tmp /run)
-MOUNTLIST="$chroot_path/.mountlist.txt"
+
 join_path() {
     case "$1" in
         */) first="$1" ;;
@@ -102,32 +136,37 @@ unmount_specials() {
 	fi
 }
 
-LOCK="$chroot_path/.chroot.lock"
+
 push() {
-    echo "$1" >> $LOCK
+    echo "$1" >> $2
 }
 pop() {
-    if [ -s $LOCK ]; then
-        last=$(tail -n 1 $LOCK)
+    if [ -s $1 ]; then
+        last=$(tail -n 1 $1)
         # remove last line
-        sed -i '$d' $LOCK
+        sed -i '$d' $1
     fi
 }
 cleanup() {
-	pop
+	pop $LOCK
+	pop $LOCK_INSTANCE
 	if [ ! -s $LOCK ]; then
 		echo "cleaning ..."
 		unmount_specials $ID
 	fi
 
 }
+when_no_instance() {
+	push $INSTANCE $LOCK_INSTANCE
+	mount_specials
+	rm $chroot_path/etc/mtab
+	cp /proc/self/mounts $chroot_path/etc/mtab
+}
 # Trap termination signals
 trap cleanup SIGINT SIGTERM SIGHUP EXIT
 echo "entering $chroot_path ..."
 if [ ! -s $LOCK ]; then
-	mount_specials
-	rm $chroot_path/etc/mtab
-	cp /proc/self/mounts $chroot_path/etc/mtab
+	when_no_instance
 fi
-push "r"
+push "r" $LOCK
 env -i $(env) PATH=$PATH:/sbin:/usr/sbin:/usr/bin:/bin chroot $chroot_path

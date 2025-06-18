@@ -1,7 +1,7 @@
 #!/bin/bash
 SU=doas
 HOME_DIR=$HOME
-sysinit=(udev-trigger udev-settle udev sysfs procfs iwd fsck devfs modules)
+sysinit=(udev-trigger udev-settle udev sysfs procfs iwd fsck devfs modules sysctl)
 default=(brightnessctl dbus dhcpcd hostname hwclock loopback mdevd networkmanager polkit seatd udev-postmount elogind)
 install_initial() {
 	$SU apk add openrc eudev mdevd 
