@@ -169,4 +169,4 @@ if [ ! -s $LOCK ]; then
 	when_no_instance
 fi
 push "r" $LOCK
-env -i $(env) PATH=$PATH:/sbin:/usr/sbin:/usr/bin:/bin chroot $chroot_path
+env -i $(env) PATH=$PATH:/sbin:/usr/sbin:/usr/bin:/bin chroot $chroot_path $2
